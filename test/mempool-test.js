@@ -15,6 +15,9 @@ const Script = require('../lib/script/script');
 const Witness = require('../lib/script/witness');
 const MemWallet = require('./util/memwallet');
 
+const ALL = Script.hashType.ALL;
+const FORK_ID = Script.hashType.FORK_ID;
+
 describe('Mempool', function() {
   let chain = new Chain({ db: 'memory' });
   let mempool = new Mempool({ chain: chain, db: 'memory' });
@@ -63,7 +66,7 @@ describe('Mempool', function() {
 
     prev = Script.fromPubkey(kp.publicKey);
     t1.addCoin(dummy(prev));
-    sig = t1.signature(0, prev, 70000, kp.privateKey, Script.hashType.ALL, 0);
+    sig = t1.signature(0, prev, 70000, kp.privateKey, ALL | FORK_ID, 0);
     t1.inputs[0].script = new Script([sig]);
 
     // balance: 51000
@@ -168,7 +171,7 @@ describe('Mempool', function() {
 
     chain.tip.height = 200;
 
-    sig = tx.signature(0, prev, 70000, kp.privateKey, Script.hashType.ALL, 0);
+    sig = tx.signature(0, prev, 70000, kp.privateKey, ALL | FORK_ID, 0);
     tx.inputs[0].script = new Script([sig]);
 
     tx = tx.toTX();
@@ -193,7 +196,7 @@ describe('Mempool', function() {
     tx.setLocktime(200);
     chain.tip.height = 200 - 1;
 
-    sig = tx.signature(0, prev, 70000, kp.privateKey, Script.hashType.ALL, 0);
+    sig = tx.signature(0, prev, 70000, kp.privateKey, ALL | FORK_ID, 0);
     tx.inputs[0].script = new Script([sig]);
     tx = tx.toTX();
 
@@ -226,7 +229,7 @@ describe('Mempool', function() {
 
     prevs = Script.fromPubkeyhash(kp.getKeyHash());
 
-    sig = tx.signature(0, prevs, 70000, kp.privateKey, Script.hashType.ALL, 1);
+    sig = tx.signature(0, prevs, 70000, kp.privateKey, ALL | FORK_ID, 1);
     sig[sig.length - 1] = 0;
 
     tx.inputs[0].witness = new Witness([sig, kp.publicKey]);
@@ -256,7 +259,7 @@ describe('Mempool', function() {
 
     tx.addCoin(dummy(prev, prevHash));
 
-    sig = tx.signature(0, prev, 70000, kp.privateKey, Script.hashType.ALL, 0);
+    sig = tx.signature(0, prev, 70000, kp.privateKey, ALL | FORK_ID, 0);
     tx.inputs[0].script = new Script([sig]);
     tx.inputs[0].witness.push(Buffer.alloc(0));
     tx = tx.toTX();
